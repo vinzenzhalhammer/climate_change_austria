@@ -2,7 +2,16 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import pandas as pd
+from functools import lru_cache
+from typing import Tuple, Dict
 import duckdb
+import logging
+logging.basicConfig(
+    format='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%m-%d-%Y %H:%M:%S',
+    level=logging.INFO
+)
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -10,39 +19,36 @@ templates = Jinja2Templates(directory="templates")
 
 con = duckdb.connect("data.duckdb")
 
-TOP_5 = [
-    {"name": "Vienna", "delta": 2.1},
-    {"name": "Graz", "delta": 1.9},
-    {"name": "Linz", "delta": 1.8},
-    {"name": "Salzburg", "delta": 1.7},
-    {"name": "Innsbruck", "delta": 1.6},
-]
+def get_top_bottom_cities():
 
-BOTTOM_5 = [
-    {"name": "Bregenz", "delta": 0.8},
-    {"name": "Eisenstadt", "delta": 0.9},
-    {"name": "Klagenfurt", "delta": 1.0},
-    {"name": "Sankt Pölten", "delta": 1.1},
-    {"name": "Villach", "delta": 1.2},
-]
+    df = con.execute("SELECT DISTINCT name, delta_temp FROM station_frontend_data").fetchdf()
 
-TOWN_ID_MAPPING = {
-    'Vienna': '105',
-    'Graz': '56',
-    'Innsbruck': '39',
-    'Salzburg': '6306',
-    'Lienz': '55',
-    'St. Paul im Lavanttal': '20501',
-}
+    top5_cities = df.nlargest(5, 'delta_temp')
+    bottom5_cities = df.nsmallest(5, 'delta_temp')
 
-TOWNS = [
-    {"name": "Vienna", "lat": 48.2082, "lon": 16.3738},
-    {"name": "Graz", "lat": 47.0707, "lon": 15.4395},
-    {"name": "Salzburg", "lat": 47.8095, "lon": 13.0550},
-    {"name": "Lienz", "lat": 46.8298, "lon": 12.7682},
-    {"name": "Innsbruck", "lat": 47.2682, "lon": 11.3923},
-    {"name": "St. Paul im Lavanttal", "lat": 46.7333, "lon": 14.8667},
-]
+    top_5 = top5_cities.to_dict(orient='records')
+    bottom_5 = bottom5_cities.to_dict(orient='records')
+
+    return (top_5, bottom_5)
+
+TOP_5, BOTTOM_5 = get_top_bottom_cities()
+
+# Fetch the relevant columns from the view
+df = con.execute("""
+    SELECT DISTINCT ON (id)
+        id, name, latitude, longitude
+    FROM station_frontend_data
+""").fetch_df()
+
+# Generate TOWN_ID_MAPPING
+TOWN_ID_MAPPING = {row["name"]: str(row["id"]) for _, row in df.iterrows()}
+
+# Generate TOWNS list
+TOWNS = [{"name": row["name"], "lat": row["latitude"], "lon": row["longitude"]} for _, row in df.iterrows()]
+
+@lru_cache
+def get_station_summary() -> pd.DataFrame:
+    return con.execute("SELECT * FROM station_frontend_data").fetchdf()
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -57,23 +63,19 @@ async def home(request: Request):
 async def get_city_data(town: str = "Vienna"):
     selection = TOWN_ID_MAPPING.get(town, '105')
 
-    df = con.execute(f"SELECT * FROM climate_data WHERE station_id = {selection}").fetchdf()
-    df = df[df["date"].dt.year < 2025]
-
-    pre_industrial = round(df[df["date"] < "1950-01-01"]["tl_mittel"].mean(), 2)
-    modern_avg = round(df[df["date"] >= "2000-01-01"]["tl_mittel"].mean(), 2)
-
-    smoothed = df["tl_mittel"].rolling(window=10).mean()
-    df["smoothed"] = round(smoothed, 2)
-    df_filtered = df[df["smoothed"].notna()].copy()
-
-    delta = round(modern_avg - pre_industrial, 2)
+    df = get_station_summary()
+    df = df[df["id"] == int(selection)]
+    pre_industrial = df["post2000_temp"].iloc[0]
+    modern_avg = df["pre1970_temp"].iloc[0]
+    delta = df["delta_temp"].iloc[0]
+    labels = df["year"].tolist()
+    smoothed_data =  df["rolling_avg_temp_10y"].tolist()
 
     return JSONResponse({
         "town": town,
         "pre_industrial": pre_industrial,
         "modern_avg": modern_avg,
         "delta": delta,
-        "labels": df_filtered["date"].dt.strftime("%Y").tolist(),
-        "smoothed_data": df_filtered["smoothed"].tolist(),
+        "labels": labels,
+        "smoothed_data": smoothed_data
     })

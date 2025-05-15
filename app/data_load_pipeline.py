@@ -3,7 +3,6 @@ import duckdb
 import pandas as pd
 from duckdb import DuckDBPyConnection
 from datetime import datetime, timedelta
-import sys
 import logging
 logging.basicConfig(
     format='%(asctime)s %(levelname)s: %(message)s',
@@ -130,8 +129,9 @@ def create_station_historic_temps(con: DuckDBPyConnection):
         SELECT
             id,
             ROUND(AVG(CASE WHEN date < DATE '1970-01-01' THEN tl_mittel END), 2) AS pre1970_temp,
-            ROUND(AVG(CASE WHEN date >= DATE '2000-01-01' THEN tl_mittel END), 2) AS post2000_temp
-        FROM measurements
+            ROUND(AVG(CASE WHEN date >= DATE '2000-01-01' THEN tl_mittel END), 2) AS post2000_temp,
+            ROUND(pre1970_temp - post2000_temp, 2) AS delta_temp
+        FROM measurement
         GROUP BY id
         ORDER BY id;
     """)
