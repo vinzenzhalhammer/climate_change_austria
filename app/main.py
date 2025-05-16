@@ -19,19 +19,15 @@ templates = Jinja2Templates(directory="templates")
 
 con = duckdb.connect("data.duckdb")
 
-def get_top_bottom_cities():
+def get_city_list():
 
     df = con.execute("SELECT DISTINCT name, delta_temp FROM station_frontend_data").fetchdf()
+    df = df.sort_values(by="delta_temp", ascending=False)
+    scroll_list = df.to_dict(orient='records')
 
-    top5_cities = df.nlargest(5, 'delta_temp')
-    bottom5_cities = df.nsmallest(5, 'delta_temp')
+    return scroll_list
 
-    top_5 = top5_cities.to_dict(orient='records')
-    bottom_5 = bottom5_cities.to_dict(orient='records')
-
-    return (top_5, bottom_5)
-
-TOP_5, BOTTOM_5 = get_top_bottom_cities()
+scroll_list = get_city_list()
 
 # Fetch the relevant columns from the view
 df = con.execute("""
@@ -41,10 +37,12 @@ df = con.execute("""
 """).fetch_df()
 
 # Generate TOWN_ID_MAPPING
-TOWN_ID_MAPPING = {row["name"]: str(row["id"]) for _, row in df.iterrows()}
+TOWN_ID_MAPPING = df[["name", "id"]].set_index("name").to_dict()["id"]
 
 # Generate TOWNS list
-TOWNS = [{"name": row["name"], "lat": row["latitude"], "lon": row["longitude"]} for _, row in df.iterrows()]
+df = df[["name", "latitude", "longitude"]].sort_values(by="name")
+df.rename(columns={"latitude": "lat", "longitude": "lon"}, inplace=True)
+TOWNS = df.to_dict(orient='records')
 
 @lru_cache
 def get_station_summary() -> pd.DataFrame:
@@ -55,12 +53,11 @@ async def home(request: Request):
     return templates.TemplateResponse("index.html", {
         "request": request,
         "towns": TOWNS,
-        "top_5": TOP_5,
-        "bottom_5": BOTTOM_5,
+        "scroll_list": scroll_list
     })
 
 @app.get("/data")
-async def get_city_data(town: str = "Vienna"):
+async def get_city_data(town: str = "Aigen im Ennstal"):
     selection = TOWN_ID_MAPPING.get(town, '105')
 
     df = get_station_summary()

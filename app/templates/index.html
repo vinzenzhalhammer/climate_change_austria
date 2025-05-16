@@ -36,26 +36,19 @@
         </form>
         <div class="space-y-6 p-4 mt-6">
             <div>
-                <h3 class="text-sm font-semibold text-gray-800 mb-2">Largest Increase</h3>
-                <ul class="divide-y divide-gray-200 bg-white rounded-lg border border-gray-200 text-sm">
-                    {% for city in top_5 %}
-                        <li class="flex justify-between items-center px-4 py-2 hover:bg-gray-50">
-                            <span class="font-medium text-gray-800">{{ city.name }}</span>
-                            <span class="text-red-600 font-semibold">{{ city.delta_temp }}°C</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div>
-                <h3 class="text-sm font-semibold text-gray-800 mb-2">Smallest Increase</h3>
-                <ul class="divide-y divide-gray-200 bg-white rounded-lg border border-gray-200 text-sm">
-                    {% for city in bottom_5 %}
-                        <li class="flex justify-between items-center px-4 py-2 hover:bg-gray-50">
-                            <span class="font-medium text-gray-800">{{ city.name }}</span>
-                            <span class="text-green-600 font-semibold">{{ city.delta_temp }}°C</span>
-                        </li>
-                    {% endfor %}
-                </ul>
+                <h3 class="text-sm font-semibold text-gray-800 mb-2">Places by Increase</h3>
+                <div class="max-h-128 overflow-y-auto overflow-x-hidden">
+                    <ul class="divide-y divide-gray-200 bg-white rounded-lg border border-gray-200 text-sm">
+                        {% for city in scroll_list %}
+                            <li data-town="{{ city.name }}" class="city-item flex justify-between items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                <span class="font-medium text-gray-800">{{ city.name }}</span>
+                                    <span class="{% if city.delta_temp < 1 %}text-green-600{% else %}text-red-600{% endif %} font-semibold">
+                                    {{ city.delta_temp }}°C
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </aside>
@@ -80,7 +73,7 @@
             <h4 class="text-2xl font-bold mb-6">Temperature trend <span id="chart-town-name"></span></h4>
             <div class="mb-6 space-y-1 max-w-[300px] text-gray-800 font-semibold ml-4">
                 <div class="flex justify-between">
-                    <span>Avg < 1970</span>
+                    <span>Avg 1950 < 1970</span>
                     <p id="pre_industrial">--</p>
                 </div>
                 <div class="flex justify-between">
@@ -184,12 +177,12 @@
                 },
                 series: [
                     {
-                        name: "10-Year Moving Avg",
+                        name: "10-Year Moving Avg Temperature",
                         type: "line",
                         data: data.smoothed_data
                     },
                     {
-                        name: "Avg < 1970",
+                        name: "Avg 1950 < 1970",
                         type: "line",
                         data: Array(data.labels.length).fill(data.pre_industrial)
                     },
@@ -260,6 +253,15 @@
                 document.getElementById("town").dispatchEvent(new Event("change"));
             });
         });
+
+        document.querySelectorAll(".city-item").forEach(item => {
+            item.addEventListener("click", () => {
+                const town = item.getAttribute("data-town");
+                document.getElementById("town").value = town;
+                document.getElementById("town").dispatchEvent(new Event("change"));
+            });
+        });
+
 
         // Load initial data on page load
         loadTownData(initialTown);

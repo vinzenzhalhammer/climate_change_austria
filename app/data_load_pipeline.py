@@ -3,6 +3,7 @@ import duckdb
 import pandas as pd
 from duckdb import DuckDBPyConnection
 from datetime import datetime, timedelta
+import argparse
 import logging
 logging.basicConfig(
     format='%(asctime)s %(levelname)s: %(message)s',
@@ -128,10 +129,10 @@ def create_station_historic_temps(con: DuckDBPyConnection):
         CREATE OR REPLACE TABLE station_summary AS
         SELECT
             id,
-            ROUND(AVG(CASE WHEN date < DATE '1970-01-01' THEN tl_mittel END), 2) AS pre1970_temp,
+            ROUND(AVG(CASE WHEN date < DATE '1970-01-01' AND DATE > '1950-01-01' THEN tl_mittel END), 2) AS pre1970_temp,
             ROUND(AVG(CASE WHEN date >= DATE '2000-01-01' THEN tl_mittel END), 2) AS post2000_temp,
-            ROUND(pre1970_temp - post2000_temp, 2) AS delta_temp
-        FROM measurement
+            ROUND(post2000_temp - pre1970_temp, 2) AS delta_temp
+        FROM measurements
         GROUP BY id
         ORDER BY id;
     """)
@@ -147,6 +148,7 @@ def create_view_for_frontend(con: DuckDBPyConnection):
             s.longitude,
             ss.pre1970_temp,
             ss.post2000_temp,
+            ss.delta_temp,
             sys.year,
             sys.tl_mittel,
             sys.rolling_avg_temp_10y
@@ -157,6 +159,11 @@ def create_view_for_frontend(con: DuckDBPyConnection):
     logging.info("Created view station_frontend_data with all the data needed for the frontend")
 
 def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--refresh", action="store_true", help="Force refetching data from API")
+    args = parser.parse_args()
+
     con = connect_to_db()
     create_stations_table(con)
     create_measurement_table(con)
@@ -167,12 +174,21 @@ def main():
     resource_id = "klima-v2-1y"  #"klima-v2-1d"
     parameters = ['TLMAX', 'TLMIN', 'TL_MITTEL']
 
-    df_stations = fetch_station_data(resource_id)
-    insert_stations(con, df_stations)
+    if args.refresh or con.execute("SELECT COUNT(*) FROM stations").fetchone()[0] == 0:
+        df_stations = fetch_station_data(resource_id)
+        insert_stations(con, df_stations)
+    else:
+        logging.info("Stations already in database. Skipping fetch.")
 
-    station_list = con.execute("SELECT id FROM stations").fetch_df()["id"].to_list()
+    station_list = con.execute("SELECT id FROM stations").fetch_df()["id"].tolist()
+    existing_ids = con.execute("SELECT DISTINCT id FROM measurements").fetch_df()["id"].tolist()
+
     for station_id in station_list:
-        # --- API Call ---
+        if args.refresh or station_id in existing_ids:
+            logging.info(f"Measurements for station {station_id} already exist. Skipping.")
+            continue
+
+        # Fetch and insert if missing
         params = {
             "parameters": ','.join(parameters),
             "start": start_date.isoformat(),
@@ -184,8 +200,6 @@ def main():
             insert_measurement(con, df_measurement)
         except Exception as e:
             logging.error(f"Failed for station {station_id}: {e}")
-
-    logging.info("Done: station and measurement data inserted.")
 
     create_station_yearly_summary(con)
     create_station_historic_temps(con)
