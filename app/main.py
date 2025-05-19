@@ -24,10 +24,11 @@ def get_city_list():
     df = con.execute("SELECT DISTINCT name, delta_temp FROM station_frontend_data").fetchdf()
     df = df.sort_values(by="delta_temp", ascending=False)
     scroll_list = df.to_dict(orient='records')
+    austria_average = round(df["delta_temp"].mean(), 2)
 
-    return scroll_list
+    return scroll_list, austria_average
 
-scroll_list = get_city_list()
+scroll_list, austria_average = get_city_list()
 
 # Fetch the relevant columns from the view
 df = con.execute("""
@@ -49,11 +50,13 @@ def get_station_summary() -> pd.DataFrame:
     return con.execute("SELECT * FROM station_frontend_data").fetchdf()
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+async def home(request: Request, town: str = "Aigen im Ennstal"):
     return templates.TemplateResponse("index.html", {
         "request": request,
+        "town": town,
         "towns": TOWNS,
-        "scroll_list": scroll_list
+        "scroll_list": scroll_list,
+        "austria_average": austria_average,
     })
 
 @app.get("/data")
