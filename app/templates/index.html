@@ -68,10 +68,10 @@
     <div class="flex flex-col sm:flex-row items-center gap-4 sm:p-6 p-4 sm:ml-64">
         <p class="max-w-5xl text-gray-800">
             Welcome to my climate change dashboard! 
-            Here you can visualize and compare temperature trends from pre-1950 versus after-2000 in Austria. 
+            Here you can visualize and compare temperature trends from 1950-1970 versus after-2000 in Austria. 
             You can select a city from the dropdown menu or click on the map to see its temperature trend. 
             The data is based on historical average yearly temperature records from
-            <a href="https://www.geosphere.at/de" class="font-medium text-blue-600 hover:underline">GeoSphere Austria</a>
+            <a href="https://www.geosphere.at/de" class="font-medium text-sky-700 hover:underline">GeoSphere Austria</a>
         </p>
         <div>
             <button data-modal-target="dataModal" data-modal-toggle="dataModal" type="button" class="cursor-pointer py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-sky-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
@@ -123,13 +123,13 @@
                         </button>
                     </div>
                     <!-- Modal body -->
-                    <div class="p-4 md:p-5 space-y-4">
-                        <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                            With less than a month to go before the European Union enacts new consumer privacy laws for its citizens, companies around the world are updating their terms of service agreements to comply.
-                        </p>
-                        <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                            The European Union’s General Data Protection Regulation (G.D.P.R.) goes into effect on May 25 and is meant to ensure a common set of data rights in the European Union. It requires organizations to notify users as soon as possible of high-risk data breaches that could personally affect them.
-                        </p>
+                    <div class="p-6 space-y-4 text-gray-700 dark:text-gray-300 text-sm">
+                        <p><strong>Source</strong> GeoSphere Austria — The <a href="https://data.hub.geosphere.at/dataset/klima-v2-1y" class="font-medium text-sky-700 hover:underline">historical yearly weather station data</a> is used in this application.</p>
+                        <p><strong>Period</strong> The perdiod varies from station to station. The earliest measurements in this appliaction is from Wien Hohe Warte which starts in 1785. I only included weather stations that have continuous data from at least 1950 onwards. With these criteria we get a total of 101 stations in Austria.</p>
+                        <p><strong>Filtering</strong> Only stations with consistent time series were kept. For the plot that is shown here the data was smoothed using 10-year moving averages.</p>
+                        <p><strong>Comparisons</strong> The yearly average temperatures (tl_mittel in the GeoSphere Api) are averaged across 1950–1970 vs. 2000-2025 to highlight warming trends.</p>
+                        <p><strong>Architecture</strong> Data was fetched once and stored in a <a href="https://duckdb.org/" class="font-medium text-sky-700 hover:underline">DuckDB</a> instance that is queried on user request. The Application is built on <a href="https://fastapi.tiangolo.com/" class="font-medium text-sky-700 hover:underline">FastAPI</a> and the frontend uses <a href="https://tailwindcss.com/" class="font-medium text-sky-700 hover:underline">tailwindcss</a>.
+                        <p class="italic text-xs">This dashboard is for educational purposes only. Data should not be used for formal research without validating methods and sources.</p>
                     </div>
                     <!-- Modal footer -->
                     <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
