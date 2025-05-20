@@ -26,7 +26,11 @@
     </button>
 
     <!-- Sidebar -->
-    <aside id="default-sidebar" class="bg-gray-50 fixed top-0 left-0 z-40 w-64 h-screen transition-transform-translate-x-full sm:translate-x-0" aria-label="Sidebar">
+    <aside id="default-sidebar" class="bg-gray-50 fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
+        <button type="button" data-drawer-hide="default-sidebar" aria-controls="default-sidebar" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 end-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" >
+            <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            <span class="sr-only">Close sidebar</span>
+        </button>
         <form class="max-w-sm mx-auto p-4 mt-12">
             <label for="town" class="block mb-2 text-sm font-semibold text-gray-900 dark:text-white">Select a city or pick on map</label>
             <select name="town" id="town" class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
@@ -74,7 +78,7 @@
             <a href="https://www.geosphere.at/de" class="font-medium text-sky-700 hover:underline">GeoSphere Austria</a>
         </p>
         <div>
-            <button data-modal-target="dataModal" data-modal-toggle="dataModal" type="button" class="cursor-pointer py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-sky-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+            <button data-modal-target="dataModal" data-modal-toggle="dataModal" type="button" class="cursor-pointer py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-sky-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                 About the data
             </button>
         </div>
@@ -107,7 +111,7 @@
 
         <!-- data Modal -->
         <div id="dataModal" tabindex="-1" class="fixed top-0 left-0 right-0 z-[9999] hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-            <div class="relative w-full max-w-4xl max-h-full">
+            <div class="relative w-full max-w-3xl max-h-full">
                 <!-- Modal content -->
                 <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
                     <!-- Modal header -->
@@ -129,7 +133,7 @@
                         <p><strong>Filtering</strong> Only stations with consistent time series were kept. For the plot that is shown here the data was smoothed using 10-year moving averages.</p>
                         <p><strong>Comparisons</strong> The yearly average temperatures (tl_mittel in the GeoSphere Api) are averaged across 1950–1970 vs. 2000-2025 to highlight warming trends.</p>
                         <p><strong>Architecture</strong> Data was fetched once and stored in a <a href="https://duckdb.org/" class="font-medium text-sky-700 hover:underline">DuckDB</a> instance that is queried on user request. The Application is built on <a href="https://fastapi.tiangolo.com/" class="font-medium text-sky-700 hover:underline">FastAPI</a> and the frontend uses <a href="https://tailwindcss.com/" class="font-medium text-sky-700 hover:underline">tailwindcss</a>.
-                        <p class="italic text-xs">This dashboard is for educational purposes only. Data should not be used for formal research without validating methods and sources.</p>
+                        <p class="italic text-xs">This dashboard is for educational purposes only. No guarantee is provided regarding the completeness or correctness of the information.</p>
                     </div>
                     <!-- Modal footer -->
                     <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
