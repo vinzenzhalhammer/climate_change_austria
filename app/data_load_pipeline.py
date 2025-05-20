@@ -55,6 +55,7 @@ def fetch_station_data(resource_id: str = "klima-v2-1y") -> pd.DataFrame:
 
     df = df[(df['valid_from'].dt.year < 1950) & (df['valid_to'].dt.year > 2040)]
     df = df[["id", "name", "state", "lat", "lon", "altitude", "valid_from", "valid_to"]]
+    df = df.drop_duplicates(subset=['name'], keep='first')
 
     df = df.rename(columns={"lat": "latitude", "lon": "longitude"})
 
