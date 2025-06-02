@@ -130,9 +130,9 @@
                     <!-- Modal body -->
                     <div class="p-6 space-y-4 text-gray-700 dark:text-gray-300 text-sm">
                         <p><strong>Source</strong> GeoSphere Austria — The <a href="https://data.hub.geosphere.at/dataset/klima-v2-1y" class="font-medium text-sky-700 hover:underline">historical yearly weather station data</a> is used in this application.</p>
-                        <p><strong>Period</strong> The perdiod varies from station to station. The earliest measurements in this application is from Wien Hohe Warte which starts in 1785. I only included weather stations that have continuous data from at least 1950 onwards. With these criteria we get a total of 101 stations in Austria.</p>
+                        <p><strong>Period</strong> The perdiod varies from station to station. The earliest measurements in this application is from Wien Hohe Warte which starts in 1785. I only included weather stations that have continuous data from at least 1950 onwards. With these criteria we get a total of 99 stations in Austria.</p>
                         <p><strong>Filtering</strong> Only stations with consistent time series were kept. For the plot that is shown here the data was smoothed using 10-year moving averages.</p>
-                        <p><strong>Comparisons</strong> The yearly average temperatures (tl_mittel in the GeoSphere Api) are averaged across 1950–1970 vs. 2000-2025 to highlight warming trends.</p>
+                        <p><strong>Comparison</strong> The yearly average temperatures (tl_mittel in the GeoSphere Api) are averaged across 1950–1970 vs. 2000-2025 to highlight warming trends. I chose these periods to allow more stations into the data selection, as many stations only have data starting from 1940 or later.</p>
                         <p><strong>Architecture</strong> Data was fetched once and stored in a <a href="https://duckdb.org/" class="font-medium text-sky-700 hover:underline">DuckDB</a> instance that is queried on user request. The Application is built on <a href="https://fastapi.tiangolo.com/" class="font-medium text-sky-700 hover:underline">FastAPI</a> and the frontend uses <a href="https://tailwindcss.com/" class="font-medium text-sky-700 hover:underline">tailwindcss</a>.
                         <p class="italic text-xs">This dashboard is for educational purposes only. No guarantee is provided regarding the completeness or correctness of the information.</p>
                     </div>
@@ -150,7 +150,7 @@
         const initialTown = "{{ town }}";
 
         const options = {
-            chart: { type: 'line', height: 450, toolbar: { show: false }},
+            chart: { type: 'line', height: 450, toolbar: { show: false }, zoom: {enabled: false }},
             tooltip: { y: { formatter: val => val + " °C" }},
             annotations: {
                 yaxis: [

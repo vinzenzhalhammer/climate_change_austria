@@ -59,6 +59,9 @@ def fetch_station_data(resource_id: str = "klima-v2-1y") -> pd.DataFrame:
 
     df = df.rename(columns={"lat": "latitude", "lon": "longitude"})
 
+    #Exclude station with missing data
+    df = df[df['id'] != 37]
+
     logging.info("Stations data fetched succesfully")
 
     return df
