@@ -5,6 +5,8 @@ from duckdb import DuckDBPyConnection
 from datetime import datetime, timedelta
 import argparse
 import logging
+from typing import Dict
+
 logging.basicConfig(
     format='%(asctime)s %(levelname)s: %(message)s',
     datefmt='%m-%d-%Y %H:%M:%S',
@@ -12,11 +14,26 @@ logging.basicConfig(
 )
 
 def connect_to_db(path: str = "data.duckdb") -> DuckDBPyConnection:
+    """
+    Connect to a DuckDB database.
+
+    Args:
+        path (str): Path to the DuckDB database file.
+
+    Returns:
+        DuckDBPyConnection: Connection object to the DuckDB database.
+    """
     con = duckdb.connect(path)
     logging.info(f"Connected to database {path}")
     return con
 
-def create_stations_table(con: DuckDBPyConnection):
+def create_stations_table(con: DuckDBPyConnection) -> None:
+    """
+    Create the 'stations' table in the database if it does not exist.
+
+    Args:
+        con (DuckDBPyConnection): Connection object to the DuckDB database.
+    """
     con.execute("""
         CREATE TABLE IF NOT EXISTS stations (
             id INTEGER PRIMARY KEY,
@@ -30,7 +47,13 @@ def create_stations_table(con: DuckDBPyConnection):
         )
     """)
 
-def create_measurement_table(con: DuckDBPyConnection):
+def create_measurement_table(con: DuckDBPyConnection) -> None:
+    """
+    Create the 'measurements' table in the database if it does not exist.
+
+    Args:
+        con (DuckDBPyConnection): Connection object to the DuckDB database.
+    """
     con.execute("""
         CREATE TABLE IF NOT EXISTS measurements (
             date DATE,
@@ -42,6 +65,15 @@ def create_measurement_table(con: DuckDBPyConnection):
     """)
 
 def fetch_station_data(resource_id: str = "klima-v2-1y") -> pd.DataFrame:
+    """
+    Fetch station metadata from the API and return as a DataFrame.
+
+    Args:
+        resource_id (str): Resource identifier for the API endpoint.
+
+    Returns:
+        pd.DataFrame: DataFrame containing station metadata.
+    """
     url = f"https://dataset.api.hub.geosphere.at/v1/station/historical/{resource_id}/metadata"
     response = requests.get(url)
     response.raise_for_status()
@@ -59,15 +91,24 @@ def fetch_station_data(resource_id: str = "klima-v2-1y") -> pd.DataFrame:
 
     df = df.rename(columns={"lat": "latitude", "lon": "longitude"})
 
-    #Exclude station with missing data
+    # Exclude station with missing data
     df = df[df['id'] != 37]
 
     logging.info("Stations data fetched succesfully")
 
     return df
 
-def fetch_measurement_data(parameter: dict, resource_id: str = "klima-v2-1y") -> pd.DataFrame:
+def fetch_measurement_data(parameter: Dict[str, str], resource_id: str = "klima-v2-1y") -> pd.DataFrame:
+    """
+    Fetch measurement data for a station from the API and return as a DataFrame.
 
+    Args:
+        parameter (Dict[str, str]): Parameters for the API request.
+        resource_id (str): Resource identifier for the API endpoint.
+
+    Returns:
+        pd.DataFrame: DataFrame containing measurement data for the station.
+    """
     url = f"https://dataset.api.hub.geosphere.at/v1/station/historical/{resource_id}"
 
     response = requests.get(url, params=parameter)
@@ -95,7 +136,14 @@ def fetch_measurement_data(parameter: dict, resource_id: str = "klima-v2-1y") ->
 
     return df
 
-def insert_stations(con: DuckDBPyConnection, df: pd.DataFrame):
+def insert_stations(con: DuckDBPyConnection, df: pd.DataFrame) -> None:
+    """
+    Insert station metadata into the 'stations' table.
+
+    Args:
+        con (DuckDBPyConnection): Connection object to the DuckDB database.
+        df (pd.DataFrame): DataFrame containing station metadata.
+    """
     con.register("df", df)
     con.execute("""
         INSERT INTO stations (id, name, state, latitude, longitude, altitude, valid_from, valid_to)
@@ -103,7 +151,14 @@ def insert_stations(con: DuckDBPyConnection, df: pd.DataFrame):
     """)
     logging.info("Stations data inserted to database")
 
-def insert_measurement(con: DuckDBPyConnection, df: pd.DataFrame):
+def insert_measurement(con: DuckDBPyConnection, df: pd.DataFrame) -> None:
+    """
+    Insert measurement data into the 'measurements' table.
+
+    Args:
+        con (DuckDBPyConnection): Connection object to the DuckDB database.
+        df (pd.DataFrame): DataFrame containing measurement data.
+    """
     con.register("df", df)
     con.execute("""
         INSERT INTO measurements (date, tlmax, tlmin, tl_mittel, id)
@@ -111,7 +166,13 @@ def insert_measurement(con: DuckDBPyConnection, df: pd.DataFrame):
     """)
     logging.info("Measurements data inserted to database")
 
-def create_station_yearly_summary(con: DuckDBPyConnection):
+def create_station_yearly_summary(con: DuckDBPyConnection) -> None:
+    """
+    Create or replace the 'station_yearly_stats' table with yearly temperature statistics and rolling averages.
+
+    Args:
+        con (DuckDBPyConnection): Connection object to the DuckDB database.
+    """
     con.execute("""
         CREATE OR REPLACE TABLE station_yearly_stats AS
         SELECT
@@ -128,7 +189,13 @@ def create_station_yearly_summary(con: DuckDBPyConnection):
     """)
     logging.info("Created table station_yearly_stats with rolling station temp averages")
 
-def create_station_historic_temps(con: DuckDBPyConnection):
+def create_station_historic_temps(con: DuckDBPyConnection) -> None:
+    """
+    Create or replace the 'station_summary' table with historic temperature averages and deltas.
+
+    Args:
+        con (DuckDBPyConnection): Connection object to the DuckDB database.
+    """
     con.execute("""
         CREATE OR REPLACE TABLE station_summary AS
         SELECT
@@ -142,7 +209,13 @@ def create_station_historic_temps(con: DuckDBPyConnection):
     """)
     logging.info("Created table station_summary with historic period temp averages")
 
-def create_view_for_frontend(con: DuckDBPyConnection):
+def create_view_for_frontend(con: DuckDBPyConnection) -> None:
+    """
+    Create or replace the 'station_frontend_data' view for frontend consumption.
+
+    Args:
+        con (DuckDBPyConnection): Connection object to the DuckDB database.
+    """
     con.execute("""
         CREATE OR REPLACE VIEW station_frontend_data AS
         SELECT
@@ -162,8 +235,11 @@ def create_view_for_frontend(con: DuckDBPyConnection):
     """)
     logging.info("Created view station_frontend_data with all the data needed for the frontend")
 
-def main():
-
+def main() -> None:
+    """
+    Main function to orchestrate the data loading pipeline.
+    Handles argument parsing, database setup, data fetching, and table/view creation.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--refresh", action="store_true", help="Force refetching data from API")
     args = parser.parse_args()
