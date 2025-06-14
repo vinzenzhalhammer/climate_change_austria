@@ -13,7 +13,7 @@ A FastAPI-powered web application that visualizes the effects of climate change 
 
 👉 **View the live dashboard here** [climateaustria.vinzenzhalhammer.com](https://climateaustria.vinzenzhalhammer.com)
 
-![Screenshot of Climate Change in Austria App](app\static\climate_change_dashboard.png)
+![Screenshot of Climate Change in Austria App](assets/climate_change_dashboard.png)
 
 ## ⚙️ Installation
 
