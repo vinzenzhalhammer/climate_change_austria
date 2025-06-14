@@ -1,4 +1,6 @@
-FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim
+FROM python:3.11-slim-bookworm
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 EXPOSE 8080
 WORKDIR /app

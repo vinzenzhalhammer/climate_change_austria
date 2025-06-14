@@ -38,8 +38,7 @@ scroll_list, austria_average = get_city_list()
 
 # Fetch the relevant columns from the view
 df: pd.DataFrame = con.execute("""
-    SELECT DISTINCT ON (id)
-        id, name, latitude, longitude
+    SELECT DISTINCT id, name, latitude, longitude
     FROM station_frontend_data
 """).fetch_df()
 
@@ -58,7 +57,7 @@ def get_station_summary() -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame containing all rows from station_frontend_data.
     """
-    return con.execute("SELECT * FROM station_frontend_data").fetchdf()
+    return con.execute("SELECT * FROM station_frontend_data").fetch_df()
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, town: str = "Aigen im Ennstal") -> HTMLResponse:
@@ -89,7 +88,7 @@ async def get_city_data(town: str = "Aigen im Ennstal") -> JSONResponse:
     Returns:
         JSONResponse: JSON containing climate data for the selected town.
     """
-    selection = TOWN_ID_MAPPING.get(town, '105')
+    selection = TOWN_ID_MAPPING.get(town, 105)
 
     df = get_station_summary()
     df = df[df["id"] == int(selection)]
