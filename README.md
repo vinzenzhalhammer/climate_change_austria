@@ -2,20 +2,20 @@
 
 A FastAPI-powered web application that visualizes the effects of climate change across Austrian towns using historical temperature data from a DuckDB database.
 
-## 📌 Features
+## Features
 
 - 🌡️ Interactive display of climate data for Austrian towns
 - 📊 Visualization of temperature deltas and 10-year rolling averages
 - 🔍 Selectable town-specific statistics with comparison to the national average
 - ⚡ Fast API and DuckDB powered backend
 
-## 🚀 Live Demo
+## Live Demo
 
 👉 **View the live dashboard here** [climateaustria.vinzenzhalhammer.com](https://climateaustria.vinzenzhalhammer.com)
 
 ![Screenshot of Climate Change in Austria App](assets/climate_change_dashboard.png)
 
-## ⚙️ Installation
+## Installation
 
 1. **Clone the repository**
 
@@ -40,7 +40,7 @@ uv run uvicorn main:app --reload
 
 Visit [http://localhost:8000](http://localhost:8000) to view the application.
 
-## 🐳 Docker
+## Docker
 
 To build and run the app in Docker:
 
@@ -49,10 +49,6 @@ docker-compose up --build
 ```
 Visit [http://localhost:8080](http://localhost:8080) to view the application.
 
-## 📊 Data Source
+## Data Source
 The application uses historical temperature data from the [Geosphere Austria](https://www.geosphere.at/en) and stores it in a DuckDB database. The data is processed to calculate temperature deltas and rolling averages.
-
-## 📃 License
-
-MIT License
 
