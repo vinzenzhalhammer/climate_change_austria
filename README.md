@@ -9,11 +9,28 @@ A FastAPI-powered web application that visualizes the effects of climate change 
 - 🔍 Selectable town-specific statistics with comparison to the national average
 - ⚡ Fast API and DuckDB powered backend
 
+I also wrote a short blog post about it on my
+[website](https://vinzenzhalhammer.com/blog/building_webapp_to_visualize_change_in_temperature).
+
 ## Live Demo
 
 👉 **View the live dashboard here** [climateaustria.vinzenzhalhammer.com](https://climateaustria.vinzenzhalhammer.com)
 
 ![Screenshot of Climate Change in Austria App](assets/climate_change_dashboard.png)
+
+## Architecture
+Stack Overview:
+- **Data source** Geosphere Austria API (klima-v2-1y dataset)
+- **Database** DuckDB (stored locally & loaded in-memory at runtime)
+- **Backend** FastAPI (serves a JSON API from precomputed DuckDB views)
+- **Frontend** Leaflet + ApexCharts + TailwindCSS (interactive map + charts)
+- **Deployment** Google Cloud Run (with custom domain via Cloudflare)
+- **Infra tools** uv for Python env & Dockerfile builds
+- **Data Flow**
+data_load_pipeline.py fetches and cleans station metadata + yearly measurements
+Computes rolling 10-year averages + pre/post temperature deltas
+Creates a view used directly by the frontend
+DuckDB makes it fast and simple to manage without needing a DB server
 
 ## Installation
 
