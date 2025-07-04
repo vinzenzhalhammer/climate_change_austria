@@ -87,7 +87,7 @@
         <div class="sm:self-auto shrink-0">
             <button data-modal-target="dataModal" data-modal-toggle="dataModal" type="button" 
                 class="cursor-pointer py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-sky-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                About the data
+                About
             </button>
         </div>
     </div>
@@ -125,7 +125,7 @@
                     <!-- Modal header -->
                     <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
                         <h3 class="text-xl font-medium text-gray-900 dark:text-white">
-                            About the data
+                            About
                         </h3>
                         <button data-modal-hide="dataModal" type="button" class="cursor-pointer text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
                             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -137,7 +137,7 @@
                     <!-- Modal body -->
                     <div class="p-6 space-y-4 text-gray-700 dark:text-gray-300 text-sm">
                         <p><strong>Source</strong> GeoSphere Austria — The <a href="https://data.hub.geosphere.at/dataset/klima-v2-1y" class="font-medium text-sky-700 hover:underline">historical yearly weather station data</a> is used in this application.</p>
-                        <p><strong>Period</strong> The perdiod varies from station to station. The earliest measurements in this application is from Wien Hohe Warte which starts in 1785. I only included weather stations that have continuous data from at least 1950 onwards. With these criteria we get a total of 99 stations in Austria.</p>
+                        <p><strong>Period</strong> The period varies from station to station. The earliest measurements in this application is from Wien Hohe Warte which starts in 1785. I only included weather stations that have continuous data from at least 1950 onwards. With these criteria we get a total of 99 stations in Austria.</p>
                         <p><strong>Filtering</strong> Only stations with consistent time series were kept. For the plot that is shown here the data was smoothed using 10-year moving averages.</p>
                         <p><strong>Comparison</strong> The yearly average temperatures (tl_mittel in the GeoSphere Api) are averaged across 1950–1970 vs. 2000-2025 to highlight warming trends. I chose these periods to allow more stations into the data selection, as many stations only have data starting from 1940 or later.</p>
                         <p><strong>Architecture</strong> Data was fetched once and stored in a <a href="https://duckdb.org/" class="font-medium text-sky-700 hover:underline">DuckDB</a> instance that is queried on user request. The Application is built on <a href="https://fastapi.tiangolo.com/" class="font-medium text-sky-700 hover:underline">FastAPI</a> and the frontend uses <a href="https://tailwindcss.com/" class="font-medium text-sky-700 hover:underline">tailwindcss</a>.
